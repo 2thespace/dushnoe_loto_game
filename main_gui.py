@@ -1,10 +1,14 @@
 import tkinter as tk
 from tkinter import colorchooser
 
+update_config_attr = lambda **kwargs: None
+devices = []
+
 class Photo:
     def __init__(self, root, name):
         self.image = tk.PhotoImage(file=name)
         self.label =  tk.Label(root, image=self.image)
+        self.root = root
         self.resize(250,250)
 
     def resize(self, x, y):
@@ -17,7 +21,7 @@ class Photo:
 class Button:
     def __init__(self, root, name, bg_color='gray'):
         self.but = tk.Button(root, text=name, background=bg_color)
-
+        self.root = root
         self.height=50
         self.width=50
     
@@ -34,9 +38,21 @@ class Button:
     
     def complete(self):
         self.but.pack()
+
+    def command(self, command):
+        self.but.config(command=command)
+
     
+            
+def change_color(update_config_attr):
+    color_info = colorchooser.askcolor()     
+    if color_info[1]:  
+        print('change color callback')
+        update_config_attr(background = color_info[1])
+        
 
 def main():
+    global devices, update_config
     root = tk.Tk()
     color='#6F6FF0'
     root.config(background=color)
@@ -50,14 +66,20 @@ def main():
     screen_height_config=int(screen_height_w/2)
     start_but.size(400,150)
 
+
+
     image.place(screen_width_config/2, screen_height_config/2-100)    
     start_but.place(screen_width_config/2, screen_height_config/2+100)
 
-    pallete_but=Button(root,"")
+    pallete_but=Button(root,"", color)
     pallete_but.image("assets/pallete.png")
     pallete_but.size(40,40)
     pallete_but.place(screen_width_config-20, 20)
 
+    devices = [root, pallete_but.but]
+    update_config_attr = lambda **kwargs: [dev.config(**kwargs) for dev in devices]
+    pallete_but.command(lambda: change_color(update_config_attr))
+    # change_color(update_config_attr)
     root.geometry(f"{screen_width_config}x{screen_height_config}")
     root.mainloop()
     return
