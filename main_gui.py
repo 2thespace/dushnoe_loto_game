@@ -69,6 +69,10 @@ class Table:
     def update_color(self, color):
         self.color = color
 
+    def on_entry_click(self, event, row, col):
+        print(f"Entry clicked at row {row}, col {col}")
+        
+
     def create(self):
         # Get the width and height of the root window
         root_width = self.root.winfo_width()
@@ -89,6 +93,7 @@ class Table:
                     x = offset_x + j * cell_width
                     y = offset_y + i * cell_height
                     self.lst[i][j].config(readonlybackground = self.color, state="readonly")
+                    self.lst[i][j].bind("<ButtonRelease-1>", lambda e, r=i, c=j: self.on_entry_click(e, r, c))
                     self.lst[i][j].place(x=x, y=y, width=cell_width, height=cell_height)
                     
 
