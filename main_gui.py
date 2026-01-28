@@ -29,7 +29,7 @@ class Button:
         self.image = tk.PhotoImage(file=path)
         self.but.config(image=self.image)
 
-    def place(self,x_new,y_new):
+    def place(self,x_new:int,y_new:int):
         self.but.place(x = x_new - self.width/2, y = y_new - self.height/2, height = self.height, width = self.width)
 
     def size(self, x_size, y_size):
@@ -63,7 +63,10 @@ class Table:
         self.duty = duty
         self.table_info = []
         self.lst = []
+        self.category = []
+        print(f"r:{self.rows} c:{self.columns}")
         self.create_table(root)
+        
         # Call create() after the window is fully initialized
         
     def update_color(self, color):
@@ -72,7 +75,13 @@ class Table:
     def on_entry_click(self, event, row, col):
         print(f"Entry clicked at row {row}, col {col}")
         
-
+    def update_category(category_list):
+        if(len(category_list) < len(self.category)):
+            print(f"Error! category size < number of collums!")
+            return
+        for i in range(self.category):
+            self.categore[i].config(text=string(category_list[i]))
+    
     def create(self):
         # Get the width and height of the root window
         root_width = self.root.winfo_width()
@@ -87,10 +96,12 @@ class Table:
         cell_height = int(root_height * self.duty / self.rows)
         
         # Place each entry widget
-        for i in range(self.rows):
-            for j in range(self.columns):
+        for j in range(self.columns):
+            self.category[j].config(background = self.color)
+            x = offset_x + j * cell_width
+            self.category[j].place(x=x + 5, y = offset_y - 20)
+            for i in range(self.rows):
                 if i < len(self.lst) and j < len(self.lst[i]):
-                    x = offset_x + j * cell_width
                     y = offset_y + i * cell_height
                     self.lst[i][j].config(readonlybackground = self.color, state="readonly")
                     self.lst[i][j].bind("<ButtonRelease-1>", lambda e, r=i, c=j: self.on_entry_click(e, r, c))
@@ -100,9 +111,10 @@ class Table:
 
     def create_table(self, root):
         self.lst = [[0 for x in range(self.columns)] for y in range(self.rows)] 
-        
-        for i in range(self.rows):
-            for j in range(self.columns):
+        self.category = [0 for x in range(self.columns)]
+        for j in range(self.columns):
+            self.category[j] = tk.Label(root, text = f"PlaceHolder{j}")
+            for i in range(self.rows):
                 self.e = tk.Entry(root, width=40, fg='blue',
                                font=('Arial', 16, 'bold'))
                 self.lst[i][j] = self.e
@@ -117,10 +129,17 @@ def print_table(root, rows, collums, duty = 0.8):
     return table
 
 
-def play_windows(root, color):
-    table = print_table(root, 10, 10)
-    table.update_color(color.Color())
-    return table
+def play_windows(root, color, r, c):
+    table = print_table(root, rows= r, collums= c)
+    table.update_color(color)
+    color_c = Color(root['bg'])
+    
+    back_button = Button(root, "Main menu", color_c.Color())
+    back_button.size(x_size = 100, y_size=50)
+    back_button.command(lambda: (destroy(root), start_window(root, color_c)))
+    back_button.place(root.winfo_width() - 50, root.winfo_height()-25)
+    table.create()
+    return table, back_button
 
 def destroy(root):
     for widget in root.winfo_children():
@@ -129,9 +148,8 @@ def destroy(root):
 def open_new_window(root):
     # Create a Toplevel window (the new window)
     destroy(root)
-    table = print_table(root, 10,10)
-    table.update_color(root["bg"])
-    table.create()
+    table = play_windows(root, root["bg"], 6, 10)
+    
     return table
 
 def start_window(root, color):
