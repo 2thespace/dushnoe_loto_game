@@ -245,7 +245,9 @@ class Windows:
             member_info = MemberMetaInfo(member)
             member_info.set_pos(pos_x, pos_y)
             member_info.set_label(member_label)
-            member_info.label.place(x = pos_x, y= pos_y, width=50, height = 15)
+            member_info.set_size(w=50, h=15)
+            [w,h] = member_info.get_size()
+            member_info.label.place(x = pos_x, y= pos_y, width=w, height = h)
             self.members[f"{name}_{member.color.Color()}"]= member_info
             print(f"add {name} with color {member.color.Color()} at {member_info.get_pos()[0]}, {member_info.get_pos()[1]}")
     
@@ -257,8 +259,10 @@ class Windows:
             member = member_info.member
             name = member.get_name()
             member_label = tk.Label(self.root, text =name, bg=member.color.Color(), fg=self.member_color)
+            member_label.bind("<Button-1>", self.delete_member)
             member_info.set_label(member_label)
-            member_info.label.place(x = pos_x, y= pos_y, width=40, height = 10)
+            [w,h] = member_info.get_size()
+            member_info.label.place(x = pos_x, y= pos_y, width=w, height = h)
         
     def play_windows(self, r, c):
         table = self.print_table(rows= r, collums= c)
@@ -303,6 +307,13 @@ class MemberMetaInfo:
     def set_pos(self, x, y):
         self.pos_x = x
         self.pos_y = y
+    
+    def set_size(self, w,h):
+        self.width = w
+        self.height = h
+    
+    def get_size(self):
+        return (self.width, self.height)
 
     def get_pos(self):
         return (self.pos_x, self.pos_y)
