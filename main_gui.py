@@ -124,70 +124,89 @@ class Table:
                 else:
                     self.e.insert(tk.END, "")
 
-def print_table(root, rows, collums, duty = 0.8):
-    table = Table(root, rows, collums, duty)
-    return table
 
 
-def play_windows(root, color, r, c):
-    table = print_table(root, rows= r, collums= c)
-    table.update_color(color)
-    color_c = Color(root['bg'])
+
+
+class Windows:
+    def __init__ (self):
+        self.root = tk.Tk()
+        self.color = Color('#6F6FF0')
+        self.devices = []
+
+    # def update_color(self, color)
+    #     self.color.
+
+    def start_window(self):
     
-    back_button = Button(root, "Main menu", color_c.Color())
-    back_button.size(x_size = 100, y_size=50)
-    back_button.command(lambda: (destroy(root), start_window(root, color_c)))
-    back_button.place(root.winfo_width() - 50, root.winfo_height()-25)
-    table.create()
-    return table, back_button
+        self.root.config(background=self.color.Color())
+        start_but = Button(self.root, "start", "pink")
+        start_but.command(self.open_new_window)
+        image = Photo(self.root, 'assets/logo.png')
+        
+        screen_width_w = self.root.winfo_screenwidth()
+        screen_height_w = self.root.winfo_screenheight()
+        screen_width_config=int(screen_width_w/2)
+        screen_height_config=int(screen_height_w/2)
+        start_but.size(400,150)
 
-def destroy(root):
-    for widget in root.winfo_children():
-        widget.destroy()  
-# Function to open the new window
-def open_new_window(root):
-    # Create a Toplevel window (the new window)
-    destroy(root)
-    table = play_windows(root, root["bg"], 6, 10)
-    
-    return table
+        image.place(screen_width_config/2, screen_height_config/2-100)    
+        start_but.place(screen_width_config/2, screen_height_config/2+100)
 
-def start_window(root, color):
-    
-    root.config(background=color.Color())
-    start_but = Button(root, "start", "pink")
-    start_but.command(lambda: open_new_window(root))
-    image = Photo(root, 'assets/logo.png')
-    
-    screen_width_w = root.winfo_screenwidth()
-    screen_height_w = root.winfo_screenheight()
-    screen_width_config=int(screen_width_w/2)
-    screen_height_config=int(screen_height_w/2)
-    start_but.size(400,150)
+        pallete_but=Button(self.root, "", self.color.Color())
+        pallete_but.image("assets/pallete.png")
+        pallete_but.size(40,40)
+        pallete_but.place(screen_width_config-20, 20)
 
-    image.place(screen_width_config/2, screen_height_config/2-100)    
-    start_but.place(screen_width_config/2, screen_height_config/2+100)
+        devices = [self.root, pallete_but.but]
+        update_config_attr = lambda **kwargs: [dev.config(**kwargs) for dev in devices]
+        pallete_but.command(lambda: self.color.change_color(update_config_attr))
+        self.root.geometry(f"{screen_width_config}x{screen_height_config}")
+        self.root.update_idletasks()
+        self.devices = [start_but, pallete_but, image]
 
-    pallete_but=Button(root, "", color.Color())
-    pallete_but.image("assets/pallete.png")
-    pallete_but.size(40,40)
-    pallete_but.place(screen_width_config-20, 20)
+    def print_table(self, rows, collums, duty = 0.8):
+        table = Table(self.root, rows, collums, duty)
+        return table
+        
+    def width(self):
+        return self.root.winfo_width()
 
-    devices = [root, pallete_but.but]
-    update_config_attr = lambda **kwargs: [dev.config(**kwargs) for dev in devices]
-    pallete_but.command(lambda: color.change_color(update_config_attr))
-    root.geometry(f"{screen_width_config}x{screen_height_config}")
-    root.update_idletasks()
-    return [start_but, pallete_but, image]
+    def height(self):
+        return self.root.winfo_height()
 
+    def play_windows(self, r, c):
+        table = self.print_table(rows= r, collums= c)
+        table.update_color(self.root['bg'])
+        color_c = Color(self.root['bg'])
+        
+        back_button = Button(self.root, "Main menu", color_c.Color())
+        back_button.size(x_size = 100, y_size=50)
+        back_button.command(lambda: (self.destroy(), self.start_window()))
+        back_button.place(self.width() - 50, self.height()-25)
+        table.create()
+        self.devices=[ table, back_button]
+
+    def destroy(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()  
+    # Function to open the new window
+    def open_new_window(self):
+        # Create a Toplevel window (the new window)
+        self.destroy()
+        table = self.play_windows(6, 10)
+        
+        return table
+
+    def run(self):
+        self.root.mainloop()
 
 def main():
     global devices, update_config
-    root = tk.Tk()
-    color = Color('#6F6FF0')
-    devices = start_window(root, color)
     
-    root.mainloop()
+    window = Windows()
+    window.start_window()
+    window.run()
     # change_color(update_config_attr)
     
     
