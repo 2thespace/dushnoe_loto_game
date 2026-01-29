@@ -1,6 +1,6 @@
 import tkinter as tk
 import random
-from tkinter import colorchooser
+from tkinter import colorchooser, simpledialog
 
 update_config_attr = lambda **kwargs: None
 devices = []
@@ -31,7 +31,9 @@ class Button:
         self.but.config(image=self.image)
 
     def place(self,x_new:int,y_new:int):
-        self.but.place(x = x_new - self.width/2, y = y_new - self.height/2, height = self.height, width = self.width)
+        self.x = x_new - self.width/2
+        self.y = y_new - self.height/2
+        self.but.place(x = self.x, y = self.y , height = self.height, width = self.width)
 
     def size(self, x_size, y_size):
         self.height=y_size
@@ -39,6 +41,9 @@ class Button:
     
     def complete(self):
         self.but.pack()
+
+    def position(self):
+        return self.x, self.y
 
     def command(self, command):
         self.but.config(command=command)
@@ -134,7 +139,7 @@ class Windows:
         self.root = tk.Tk()
         self.color = Color('#6F6FF0')
         self.devices = []
-        self.members = []
+        self.members = dict()
         self.rows = 6
         self.collums = 10
     # def update_color(self, color)
@@ -178,12 +183,45 @@ class Windows:
     def height(self):
         return self.root.winfo_height()
 
-    def add_member(self):
-        name = "random name"
-        member = Member("random name")
-        self.members.append(member)
-        print(f"add {name} with color {member.color.Color()}")
+    def get_member_coordinate(self, member):
+        
+        return
+    
+    def get_optimal_pos(self):
+        if(len(self.members) ==0):
+            x,y = self.member_button.position()
+            return (x + 10,y+60)
+        max = (0,0)
+        for member in self.members.values():
+            coors =  member.get_pos()
+            if (max) < coors:
+                max = coors
+        return (coors[0], coors[1]+20)
 
+
+    def add_member(self):
+        user_input = tk.simpledialog.askstring("Add player", "Enter your name:")
+        if user_input is not None and user_input != "":
+            name = user_input
+            member = Member(name)
+            member_label = tk.Label(self.root, text =name, bg=member.color.Color(), fg='white')
+            pos_x, pos_y = self.get_optimal_pos()
+            member_info = MemberMetaInfo(member)
+            member_info.set_pos(pos_x, pos_y)
+            member_info.set_label(member_label)
+            member_info.label.place(x = pos_x, y= pos_y, width=40, height = 10)
+            self.members[name]= member_info
+            print(f"add {name} with color {member.color.Color()} at {member_info.get_pos()[0]}, {member_info.get_pos()[1]}")
+    
+    def update_member(self):
+        for member_info in self.members.values():
+            pos_x, pos_y = member_info.get_pos()
+            member = member_info.member
+            name = member.get_name()
+            member_label = tk.Label(self.root, text =name, bg=member.color.Color(), fg='white')
+            member_info.set_label(member_label)
+            member_info.label.place(x = pos_x, y= pos_y, width=40, height = 10)
+        
     def play_windows(self, r, c):
         table = self.print_table(rows= r, collums= c)
         table.update_color(self.root['bg'])
@@ -200,14 +238,15 @@ class Windows:
         member_button.place(self.width() - 50, 30)
 
         table.create()
+        self.member_button = member_button
         self.devices=[ table, back_button, member_button]
 
     def destroy(self):
         for widget in self.root.winfo_children():
-            widget.destroy()  
-    # Function to open the new window
+            widget.destroy()
+        self.update_member()  
+
     def open_new_window(self):
-        # Create a Toplevel window (the new window)
         self.destroy()
         table = self.play_windows(r=self.rows, c = self.collums)
         
@@ -216,10 +255,26 @@ class Windows:
     def run(self):
         self.root.mainloop()
 
+class MemberMetaInfo:
+    def __init__(self, member):
+        self.member = member
+        self.pos_x = 0
+        self.pos_y = 0
+        self.label = None
+    
+    def set_pos(self, x, y):
+        self.pos_x = x
+        self.pos_y = y
+
+    def get_pos(self):
+        return (self.pos_x, self.pos_y)
+
+    def set_label(self, label):
+        self.label = label
+
 class Member:
     def __init__(self, new_name):
         self.color = Color(self.random_color())
-        self.position = (0,0)
         self.name = new_name
 
     def random_color(self):
@@ -227,16 +282,12 @@ class Member:
         g = random.randint(0, 255)
         b = random.randint(0, 255)
         return f"#{r:02x}{g:02x}{b:02x}"
-
-    def set_position(self, x,y):
-        self.position = (x,y)
-    
-    def get_position(self):
-        return self.position
     
     def change_color(self, new_color):
         self.color = Color(new_color)
 
+    def get_name(self):
+        return self.name
 
 def main():
     global devices, update_config
