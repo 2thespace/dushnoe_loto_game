@@ -5,6 +5,30 @@ from tkinter import colorchooser, simpledialog
 update_config_attr = lambda **kwargs: None
 devices = []
 
+def desaturate_rgb_average(rgb, amount=0.5):
+    """
+    Desaturate RGB by mixing with gray (average of RGB).
+    
+    Args:
+        rgb: (R, G, B) in 0-255 range
+        amount: 0-1 (0 = no change, 1 = grayscale)
+    
+    Returns:
+        Desaturated (R, G, B)
+    """
+    r, g, b = rgb
+    
+    # Calculate grayscale value (average)
+    gray = int(0.2989 * r + 0.5870 * g + 0.1140 * b)  # Perceptual weights
+    # Or simple average: gray = int((r + g + b) / 3)
+    
+    # Mix with original
+    new_r = r
+    new_g = int(g + (gray - g) * amount)
+    new_b =b
+    
+    return (new_r, new_g, new_b)
+
 class Photo:
     def __init__(self, root, name):
         self.image = tk.PhotoImage(file=name)
@@ -142,6 +166,7 @@ class Windows:
         self.members = dict()
         self.rows = 6
         self.collums = 10
+        self.member_color = 'black'
     # def update_color(self, color)
     #     self.color.
 
@@ -198,27 +223,40 @@ class Windows:
                 max = coors
         return (coors[0], coors[1]+20)
 
+    def delete_member(self, event):
+        for member in self.members.values():
+            if(event.widget == member.label):
+                key = f"{member.member.name}_{member.member.color.Color()}"
+                print(f"erasing {key}")
+                member.label.destroy()
+                self.members.pop(key)
+                self.update_member()
+                return
+        
 
     def add_member(self):
         user_input = tk.simpledialog.askstring("Add player", "Enter your name:")
         if user_input is not None and user_input != "":
             name = user_input
             member = Member(name)
-            member_label = tk.Label(self.root, text =name, bg=member.color.Color(), fg='white')
+            member_label = tk.Label(self.root, text =name, bg=member.color.Color(), fg=self.member_color)
+            member_label.bind("<Button-1>", self.delete_member)
             pos_x, pos_y = self.get_optimal_pos()
             member_info = MemberMetaInfo(member)
             member_info.set_pos(pos_x, pos_y)
             member_info.set_label(member_label)
-            member_info.label.place(x = pos_x, y= pos_y, width=40, height = 10)
-            self.members[name]= member_info
+            member_info.label.place(x = pos_x, y= pos_y, width=50, height = 15)
+            self.members[f"{name}_{member.color.Color()}"]= member_info
             print(f"add {name} with color {member.color.Color()} at {member_info.get_pos()[0]}, {member_info.get_pos()[1]}")
     
     def update_member(self):
+        if(len(self.members) == 0):
+            return
         for member_info in self.members.values():
             pos_x, pos_y = member_info.get_pos()
             member = member_info.member
             name = member.get_name()
-            member_label = tk.Label(self.root, text =name, bg=member.color.Color(), fg='white')
+            member_label = tk.Label(self.root, text =name, bg=member.color.Color(), fg=self.member_color)
             member_info.set_label(member_label)
             member_info.label.place(x = pos_x, y= pos_y, width=40, height = 10)
         
@@ -239,7 +277,7 @@ class Windows:
 
         table.create()
         self.member_button = member_button
-        self.devices=[ table, back_button, member_button]
+        self.devices=[table, back_button, member_button]
 
     def destroy(self):
         for widget in self.root.winfo_children():
@@ -281,6 +319,7 @@ class Member:
         r = random.randint(0, 255)
         g = random.randint(0, 255)
         b = random.randint(0, 255)
+        (r,g,b) = desaturate_rgb_average((r,g,b), 0.3)
         return f"#{r:02x}{g:02x}{b:02x}"
     
     def change_color(self, new_color):
