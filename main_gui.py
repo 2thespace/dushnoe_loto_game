@@ -1,4 +1,5 @@
 import tkinter as tk
+import random
 from tkinter import colorchooser
 
 update_config_attr = lambda **kwargs: None
@@ -64,7 +65,7 @@ class Table:
         self.table_info = []
         self.lst = []
         self.category = []
-        print(f"r:{self.rows} c:{self.columns}")
+        print(f"row:{self.rows} color:{self.columns}")
         self.create_table(root)
         
         # Call create() after the window is fully initialized
@@ -133,7 +134,9 @@ class Windows:
         self.root = tk.Tk()
         self.color = Color('#6F6FF0')
         self.devices = []
-
+        self.members = []
+        self.rows = 6
+        self.collums = 10
     # def update_color(self, color)
     #     self.color.
 
@@ -175,6 +178,12 @@ class Windows:
     def height(self):
         return self.root.winfo_height()
 
+    def add_member(self):
+        name = "random name"
+        member = Member("random name")
+        self.members.append(member)
+        print(f"add {name} with color {member.color.Color()}")
+
     def play_windows(self, r, c):
         table = self.print_table(rows= r, collums= c)
         table.update_color(self.root['bg'])
@@ -184,8 +193,14 @@ class Windows:
         back_button.size(x_size = 100, y_size=50)
         back_button.command(lambda: (self.destroy(), self.start_window()))
         back_button.place(self.width() - 50, self.height()-25)
+
+        member_button = Button(self.root, "Add player", color_c.Color())
+        member_button.command(self.add_member)
+        member_button.size(x_size = 100, y_size=50)
+        member_button.place(self.width() - 50, 30)
+
         table.create()
-        self.devices=[ table, back_button]
+        self.devices=[ table, back_button, member_button]
 
     def destroy(self):
         for widget in self.root.winfo_children():
@@ -194,26 +209,44 @@ class Windows:
     def open_new_window(self):
         # Create a Toplevel window (the new window)
         self.destroy()
-        table = self.play_windows(6, 10)
+        table = self.play_windows(r=self.rows, c = self.collums)
         
         return table
 
     def run(self):
         self.root.mainloop()
 
+class Member:
+    def __init__(self, new_name):
+        self.color = Color(self.random_color())
+        self.position = (0,0)
+        self.name = new_name
+
+    def random_color(self):
+        r = random.randint(0, 255)
+        g = random.randint(0, 255)
+        b = random.randint(0, 255)
+        return f"#{r:02x}{g:02x}{b:02x}"
+
+    def set_position(self, x,y):
+        self.position = (x,y)
+    
+    def get_position(self):
+        return self.position
+    
+    def change_color(self, new_color):
+        self.color = Color(new_color)
+
+
 def main():
     global devices, update_config
     
     window = Windows()
     window.start_window()
-    window.run()
-    # change_color(update_config_attr)
-    
-    
+    window.run()   
     return
 
 
 
 if __name__ =="__main__":
-    
     main()
