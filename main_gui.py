@@ -1,6 +1,7 @@
 import tkinter as tk
 import random
 from tkinter import colorchooser, simpledialog
+from enum import Enum
 
 update_config_attr = lambda **kwargs: None
 devices = []
@@ -143,8 +144,7 @@ class Table:
     def update_color(self, color):
         self.color = color
 
-    def on_entry_click(self, event, row, col):
-        print(f"Entry clicked at row {row}, col {col}")
+    
         
     def update_category(category_list):
         if(len(category_list) < len(self.category)):
@@ -153,7 +153,7 @@ class Table:
         for i in range(self.category):
             self.categore[i].config(text=string(category_list[i]))
     
-    def create(self):
+    def create(self, callback):
         # Get the width and height of the root window
         root_width = self.root.winfo_width()
         root_height = self.root.winfo_height()
@@ -175,7 +175,7 @@ class Table:
                 if i < len(self.lst) and j < len(self.lst[i]):
                     y = offset_y + i * cell_height
                     self.lst[i][j].config(readonlybackground = self.color, state="readonly")
-                    self.lst[i][j].bind("<ButtonRelease-1>", lambda e, r=i, c=j: self.on_entry_click(e, r, c))
+                    self.lst[i][j].bind("<ButtonRelease-1>", lambda e, r=i, c=j: callback(e, r, c))
                     self.lst[i][j].place(x=x, y=y, width=cell_width, height=cell_height)
                     
 
@@ -197,6 +197,11 @@ class Table:
 
 
 
+class Page_State(Enum):
+    MAIN_WINDOW=0
+    TABLE_WINDOW=1
+    CHOOSE_WINDOW=2
+    RIGHT_ANSWER_WINDOW=3
 
 
 class Windows:
@@ -208,14 +213,46 @@ class Windows:
         self.rows = 6
         self.collums = 10
         self.member_color = 'black'
+        self.page_state=Page_State.MAIN_WINDOW
+        self.choosed_row =None
+        self.choosed_col=None
     # def update_color(self, color)
     #     self.color.
+
+    def on_entry_click(self, event, row, col):
+        self.choosed_col = col
+        self.choosed_row = row
+        print(f"Entry clicked at row {self.choosed_col}, col {self.choosed_row}")
+        self.update_page(Page_State.CHOOSE_WINDOW)
+
+    def update_page(self, new_state):
+        old_page = self.page_state
+        self.page_state = new_state
+        if(new_state == Page_State.MAIN_WINDOW):
+            self.destroy()
+            self.update_member() 
+            self.start_window()
+            print("go to start window")
+        elif(new_state == Page_State.TABLE_WINDOW):
+            self.destroy()
+            self.update_member() 
+            table = self.play_windows(r=self.rows, c = self.collums)
+            print("go to table window")
+        elif(new_state == Page_State.CHOOSE_WINDOW):
+            print("go to choose_window")
+            self.destroy()
+            self.update_member() 
+        else:
+            print(f"undefined state {new_state}")
+            self.page_state = old_page
+        
+        
 
     def start_window(self):
     
         self.root.config(background=self.color.Color())
         start_but = Button(self.root, "start", "pink")
-        start_but.command(self.open_new_window)
+        start_but.command(lambda: self.update_page(Page_State.TABLE_WINDOW))
         image = Photo(self.root, 'assets/logo.png')
         
         screen_width_w = self.root.winfo_screenwidth()
@@ -272,9 +309,6 @@ class Windows:
                 key = f"{member.member.name}_{member.member.color.Color()}"
                 print(f"erasing {key}")
                 erasing_members.append(key)
-                # self.members.pop(key)
-                # self.update_member()
-                # return
         for key in erasing_members:
             self.members.pop(key)
         self.update_member()
@@ -318,7 +352,7 @@ class Windows:
         
         back_button = Button(self.root, "Main menu", color_c.Color())
         back_button.size(x_size = 100, y_size=50)
-        back_button.command(lambda: (self.destroy(), self.start_window()))
+        back_button.command(lambda: self.update_page(Page_State.MAIN_WINDOW))
         back_button.place(self.width() - 50, self.height()-25)
 
         member_button = Button(self.root, "Add player", color_c.Color())
@@ -326,7 +360,7 @@ class Windows:
         member_button.size(x_size = 100, y_size=50)
         member_button.place(self.width() - 50, 30)
 
-        table.create()
+        table.create(self.on_entry_click)
         self.member_button = member_button
         self.devices=[table, back_button, member_button]
 
@@ -336,13 +370,6 @@ class Windows:
     def destroy(self):
         for widget in self.root.winfo_children():
             widget.destroy()
-        self.update_member()  
-
-    def open_new_window(self):
-        self.destroy()
-        table = self.play_windows(r=self.rows, c = self.collums)
-        
-        return table
 
     def run(self):
         self.root.mainloop()
