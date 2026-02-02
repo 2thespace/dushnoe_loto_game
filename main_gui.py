@@ -195,6 +195,36 @@ class Table:
                 else:
                     self.e.insert(tk.END, "")
 
+class AnswerChooser:
+    def __init__(self, root, question, answer_list, right_answer_index):
+        self.root = root
+        self.question = question
+        self.answer_list = answer_list
+        self.right_answer_index = right_answer_index
+        self.is_showing_answer = False
+        self.font_size  = 14
+
+    def font_size(self, new_font):
+        self.font_size = new_font
+    
+    def show_asnwer_list(self):
+        if(not self.is_showing_answer):
+            self.is_showing_answer = True
+        else:
+            self.is_showing_answer = False
+        print(f"answer state is {self.is_showing_answer }")
+
+
+    def create(self):
+        self.question_label = tk.Label(master = self.root, text = self.question, bg = self.root['bg'],  font=("Arial", self.font_size, "bold"))
+        self.duhota_button = tk.Button(master = self.root, command=self.show_asnwer_list, text="Maxim dushnish", bg = self.root['bg'], )
+    
+    def run(self):
+        width  = self.root.winfo_width()
+        height = self.root.winfo_height()
+        print(width, height)
+        self.question_label.place(x = width/2, y = height/2, width=width*0.1, height=height*0.1)
+        self.duhota_button.place(x=width/2, y=height*0.9, width = width*0.1, height=height*0.1)
 
 
 class Page_State(Enum):
@@ -242,6 +272,9 @@ class Windows:
             print("go to choose_window")
             self.destroy()
             self.update_member() 
+            answer = AnswerChooser(self.root, "Who is kill Mark?", ("A", "B", "C", "D"), 3)
+            answer.create()
+            answer.run()
         else:
             print(f"undefined state {new_state}")
             self.page_state = old_page
