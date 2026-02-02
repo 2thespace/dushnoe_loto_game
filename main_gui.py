@@ -16,17 +16,58 @@ def desaturate_rgb_average(rgb, amount=0.5):
     Returns:
         Desaturated (R, G, B)
     """
-    r, g, b = rgb
+   
     
-    # Calculate grayscale value (average)
-    gray = int(0.2989 * r + 0.5870 * g + 0.1140 * b)  # Perceptual weights
-    # Or simple average: gray = int((r + g + b) / 3)
-    
-    # Mix with original
-    new_r = r
-    new_g = int(g + (gray - g) * amount)
-    new_b =b
-    
+    def convert_to_hsv(rgb):
+        r,g,b=rgb
+        r=r/255
+        g=g/255
+        b=b/255
+        Cmax=max(r,g,b)
+        Cmin=min(r,g,b)
+        delta = Cmax - Cmin
+        H = 0
+        if(delta == 0):
+            H=H
+        elif(Cmax == r):
+            H = 60*((g-b)/delta)%6
+        elif(Cmax == g):
+            H = 60*((b-r)/delta+2)
+        elif (Cmax == b):
+            H = 60*((r-g)/delta+4)
+        V=Cmax
+        S= delta/Cmax if Cmax !=0 else 0
+        return H,S,V
+
+    def convert_to_rgb(hsv):
+        (h,s,v)=hsv
+        C=v*s
+        Hnorm = abs(h/60%2-1)
+        X=C*(1-Hnorm)
+        m=v-C
+        rd=0
+        gd=0
+        bd=0
+        H=h
+        if(H<60):
+            rd,gd,bd = (C,X,0)    
+        elif(H>=60 and H < 120):
+            rd,gd,bd = (X,C, 0)
+        elif(H>=120 and H < 180):
+            rd,gd,bd = (0,C,X)
+        elif(H>=180 and H < 240):
+            rd,gd,bd = (0,X,C)
+        elif(H>=240 and H < 300):
+            rd,gd,bd = (X,0,C)
+        elif(H>=300 and H < 360):
+            rd,gd,bd = (C,0,X)
+        r=(rd+m)*255
+        g=(gd+m)*255
+        b=(bd+m)*255
+        return int(r),int(g),int(b)
+    (h,s,v) = convert_to_hsv(rgb)
+    s=amount*s
+    (new_r, new_g, new_b)= convert_to_rgb((h,s,v))
     return (new_r, new_g, new_b)
 
 class Photo:
@@ -283,6 +324,9 @@ class Windows:
         self.member_button = member_button
         self.devices=[table, back_button, member_button]
 
+    def answers(self):
+        None
+
     def destroy(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -330,7 +374,7 @@ class Member:
         r = random.randint(0, 255)
         g = random.randint(0, 255)
         b = random.randint(0, 255)
-        (r,g,b) = desaturate_rgb_average((r,g,b), 0.3)
+        (r,g,b) = desaturate_rgb_average((r,g,b), 0.7)
         return f"#{r:02x}{g:02x}{b:02x}"
     
     def change_color(self, new_color):
