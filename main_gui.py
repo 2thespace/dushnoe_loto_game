@@ -265,14 +265,20 @@ class Windows:
         return (coors[0], coors[1]+20)
 
     def delete_member(self, event):
+        erasing_members = []
         for member in self.members.values():
+            member.label.destroy()
             if(event.widget == member.label):
                 key = f"{member.member.name}_{member.member.color.Color()}"
                 print(f"erasing {key}")
-                member.label.destroy()
-                self.members.pop(key)
-                self.update_member()
-                return
+                erasing_members.append(key)
+                # self.members.pop(key)
+                # self.update_member()
+                # return
+        for key in erasing_members:
+            self.members.pop(key)
+        self.update_member()
+
         
 
     def add_member(self):
