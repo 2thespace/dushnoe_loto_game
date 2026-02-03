@@ -202,29 +202,63 @@ class AnswerChooser:
         self.answer_list = answer_list
         self.right_answer_index = right_answer_index
         self.is_showing_answer = False
-        self.font_size  = 14
+        self.font_size  = 20
+        self.label_answer = []
 
     def font_size(self, new_font):
         self.font_size = new_font
     
-    def show_asnwer_list(self):
+    def show_answer_list(self):
+
+        for (label,x,y) in self.label_answer:
+            if self.is_showing_answer:
+                    label.place_forget()
+                    print(label, "is invisible")
+            else:
+                label.place(relx=x, rely=y, anchor="w")
+                print(label, f"is visible at {x} {y}")
+
         if(not self.is_showing_answer):
             self.is_showing_answer = True
+            self.question_label.place(relx=0.5, rely=0.1, anchor="center")
         else:
             self.is_showing_answer = False
+            self.question_label.place(relx=0.5, rely=0.5, anchor="center")
+        
+            
+            
         print(f"answer state is {self.is_showing_answer }")
 
 
+    def on_label_click(self):
+        _
+
     def create(self):
-        self.question_label = tk.Label(master = self.root, text = self.question, bg = self.root['bg'],  font=("Arial", self.font_size, "bold"))
-        self.duhota_button = tk.Button(master = self.root, command=self.show_asnwer_list, text="Maxim dushnish", bg = self.root['bg'], )
+        self.question_label = tk.Label(master = self.root, text = self.question, bg = self.root['bg'],  font=("Arial", self.font_size, "bold"), anchor="center", justify="center")
+        self.duhota_button = tk.Button(master = self.root, command=self.show_answer_list, text="Maxim dushnish", bg = self.root['bg'], )
     
     def run(self):
         width  = self.root.winfo_width()
         height = self.root.winfo_height()
+        offset_rel = 0.3
+        index = 1
+        label_answer = []
+        offset_x = offset_y = offset_rel
+        label_size = int(self.font_size*0.75)
+        for answer in self.answer_list:
+            offset_x = offset_rel
+            
+            if(index%2==0):
+                offset_x = offset_x + 0.3
+            else:
+                offset_y = offset_y + index*0.1
+            label = tk.Label(master = self.root,  anchor="w", text = answer, bg = self.root['bg'], font=("Arial", label_size , "bold"), justify="left")
+            label_answer.append((label, offset_x, offset_y))
+            index = index + 1
+        self.label_answer = label_answer
         print(width, height)
-        self.question_label.place(x = width/2, y = height/2, width=width*0.1, height=height*0.1)
-        self.duhota_button.place(x=width/2, y=height*0.9, width = width*0.1, height=height*0.1)
+        self.question_label.place(relx=0.5, rely=0.4, anchor="center")
+        self.duhota_button.place(relx=0.5, rely=0.9, anchor="center", width = width*0.1, height=height*0.1)
 
 
 class Page_State(Enum):
@@ -272,7 +306,7 @@ class Windows:
             print("go to choose_window")
             self.destroy()
             self.update_member() 
-            answer = AnswerChooser(self.root, "Who is kill Mark?", ("A", "B", "C", "D"), 3)
+            answer = AnswerChooser(self.root, "Who is kill Mark?", ("Aaaaaaaaaaaaaaaaaa", "Bbbbbbbbbbbbbbb", "Cccccccccccccc", "Dddddddddddd"), 3)
             answer.create()
             answer.run()
         else:
@@ -336,10 +370,9 @@ class Windows:
 
     def delete_member(self, event):
         erasing_members = []
-        for member in self.members.values():
+        for key, member in self.members.items():
             member.label.destroy()
             if(event.widget == member.label):
-                key = f"{member.member.name}_{member.member.color.Color()}"
                 print(f"erasing {key}")
                 erasing_members.append(key)
         for key in erasing_members:
