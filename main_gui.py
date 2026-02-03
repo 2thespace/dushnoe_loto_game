@@ -240,18 +240,20 @@ class AnswerChooser:
     def run(self):
         width  = self.root.winfo_width()
         height = self.root.winfo_height()
-        offset_rel = 0.3
+        offset_rel = 0.256
         index = 1
         label_answer = []
         offset_x = offset_y = offset_rel
         label_size = int(self.font_size*0.75)
+        steps_y = 1.6/len(self.answer_list)/2
+        steps_x = 0.3
         for answer in self.answer_list:
             offset_x = offset_rel
             
             if(index%2==0):
-                offset_x = offset_x + 0.3
+                offset_x = offset_x + steps_x
             else:
-                offset_y = offset_y + index*0.1
+                offset_y = offset_y + steps_y
             label = tk.Label(master = self.root,  anchor="w", text = answer, bg = self.root['bg'], font=("Arial", label_size , "bold"), justify="left")
             label_answer.append((label, offset_x, offset_y))
             index = index + 1
@@ -306,7 +308,7 @@ class Windows:
             print("go to choose_window")
             self.destroy()
             self.update_member() 
-            answer = AnswerChooser(self.root, "Who is kill Mark?", ("Aaaaaaaaaaaaaaaaaa", "Bbbbbbbbbbbbbbb", "Cccccccccccccc", "Dddddddddddd"), 3)
+            answer = AnswerChooser(self.root, "Who is kill Mark?", ("Aaaaaaaaaaaaaaaaaa", "Bbbbbbbbbbbbbbb", "Cccccccccccccc", "Dddddddddddd", "Eeeeeeeeeeee", "Ffffffffffffff"), 3)
             answer.create()
             answer.run()
         else:
