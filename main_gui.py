@@ -230,8 +230,16 @@ class AnswerChooser:
         print(f"answer state is {self.is_showing_answer }")
 
 
-    def on_label_click(self):
-        _
+    def on_label_click(self, event):
+        print(self.label_answer[self.right_answer_index][0], event.widget)
+        for (label,x,y) in self.label_answer:
+            print(self.label_answer[self.right_answer_index][0], label, event.widget)
+            if(self.label_answer[self.right_answer_index][0] == label):
+                print("Right answer")
+                self.label_answer[self.right_answer_index][0]['fg']='lime'
+                continue
+            label['fg'] = 'red'    
+            print("Wrong answer")
 
     def create(self):
         self.question_label = tk.Label(master = self.root, text = self.question, bg = self.root['bg'],  font=("Arial", self.font_size, "bold"), anchor="center", justify="center")
@@ -254,7 +262,8 @@ class AnswerChooser:
                 offset_x = offset_x + steps_x
             else:
                 offset_y = offset_y + steps_y
-            label = tk.Label(master = self.root,  anchor="w", text = answer, bg = self.root['bg'], font=("Arial", label_size , "bold"), justify="left")
+            label = tk.Label(master = self.root,  anchor="w", text = answer, bg = self.root['bg'], font=("Arial", label_size , "bold"), justify="center")
+            label.bind('<Button-1>', self.on_label_click)
             label_answer.append((label, offset_x, offset_y))
             index = index + 1
         self.label_answer = label_answer
