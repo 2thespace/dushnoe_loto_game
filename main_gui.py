@@ -231,9 +231,7 @@ class AnswerChooser:
 
 
     def on_label_click(self, event):
-        print(self.label_answer[self.right_answer_index][0], event.widget)
         for (label,x,y) in self.label_answer:
-            print(self.label_answer[self.right_answer_index][0], label, event.widget)
             if(self.label_answer[self.right_answer_index][0] == label):
                 print("Right answer")
                 self.label_answer[self.right_answer_index][0]['fg']='lime'
